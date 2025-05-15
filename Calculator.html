@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Date Calculator</title>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Roboto+Condensed&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'OFADeck';
+      src: local('OFADeck'), url('https://fonts.cdnfonts.com/s/88912/OFADeck.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    body {
+      font-family: 'Lora', serif;
+      background-color: white;
+      color: #2b353b;
+      margin: 0;
+      padding: 0;
+    }
+
+    .banner {
+    background-color: #516725;
+    padding: 1rem;
+    text-align: center;
+    margin: 2rem auto; 
+    max-width: 85%;    
+    }
+
+    h1 {
+      font-family: 'OFADeck', sans-serif;
+      font-size: 29px;
+      line-height: 16px;
+      font-weight: 400;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 2rem auto;
+      background: white;
+      border: 2px solid #ad2a24;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-weight: 700;
+      display: block;
+      color: #2b353b;
+      font-size: 16px;
+      margin-top: 1rem;
+    }
+
+    input[type="date"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 18px;
+      color: #2b353b;
+      line-height: 28px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 0.3rem;
+      box-sizing: border-box;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #ad2a24;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      background-color: #516725;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #4c6373;
+    }
+
+    button[type="reset"] {
+      background-color: #ad2a24;
+    }
+
+    #result {
+      margin-top: 1rem;
+      font-family: 'Lora', serif;
+      font-size: 16px;
+      color: #2b353b;
+      font-weight: 700;
+    }
+
+    .error {
+      margin-top: 0.5rem;
+      font-family: 'Lora', serif;
+      font-size: 16px;
+      color: red;
+      font-weight: 700;
+    }
+
+    small {
+      font-family: 'Lora', serif;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="banner">
+    <h1>Date Calculator</h1>
+  </div>
+
+  <div class="container">
+    <form id="dateForm">
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" name="startDate" required>
+      <small>Note: Your browser may show date in local format. Output will always be in MM/DD/YYYY.</small>
+
+      <label for="operation">Operation:</label>
+      <select id="operation">
+        <option value="add">Add</option>
+        <option value="subtract">Subtract</option>
+      </select>
+
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" name="amount" required min="0" placeholder="Enter a number">
+
+      <label for="unit">Unit:</label>
+      <select id="unit">
+        <option value="days">Days</option>
+        <option value="weeks">Weeks</option>
+        <option value="months">Months</option>
+        <option value="years">Years</option>
+      </select>
+
+      <div class="buttons">
+        <button type="submit">Calculate</button>
+        <button type="reset" id="resetBtn">Reset</button>
+      </div>
+    </form>
+
+    <div id="result"></div>
+    <div id="error" class="error"></div>
+  </div>
+
+  <script>
+    function formatDateUS(date) {
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      return `${mm}/${dd}/${yyyy}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("dateForm");
+      const resultDiv = document.getElementById("result");
+      const errorDiv = document.getElementById("error");
+      const resetBtn = document.getElementById("resetBtn");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        resultDiv.textContent = '';
+        errorDiv.textContent = '';
+
+        const startDateValue = document.getElementById("startDate").value;
+        const operation = document.getElementById("operation").value;
+        const amount = document.getElementById("amount").value;
+        const unit = document.getElementById("unit").value;
+
+        if (!startDateValue || isNaN(amount) || amount === '') {
+          errorDiv.textContent = "Please enter a valid date and number.";
+          return;
+        }
+
+        const date = new Date(startDateValue);
+        if (isNaN(date.getTime())) {
+          errorDiv.textContent = "Invalid date.";
+          return;
+        }
+
+        const numericAmount = parseInt(amount);
+
+        if (operation === "add") {
+          switch (unit) {
+            case "days": date.setDate(date.getDate() + numericAmount); break;
+            case "weeks": date.setDate(date.getDate() + numericAmount * 7); break;
+            case "months": date.setMonth(date.getMonth() + numericAmount); break;
+            case "years": date.setFullYear(date.getFullYear() + numericAmount); break;
+          }
+        } else {
+          switch (unit) {
+            case "days": date.setDate(date.getDate() - numericAmount); break;
+            case "weeks": date.setDate(date.getDate() - numericAmount * 7); break;
+            case "months": date.setMonth(date.getMonth() - numericAmount); break;
+            case "years": date.setFullYear(date.getFullYear() - numericAmount); break;
+          }
+        }
+
+        if (date.getFullYear() > (new Date().getFullYear() + 1000)) {
+          errorDiv.textContent = "Date exceeds maximum supported range (1000 years).";
+          return;
+        }
+
+        resultDiv.textContent = `Resulting Date: ${formatDateUS(date)}`;
+      });
+
+      resetBtn.addEventListener("click", function () {
+        resultDiv.textContent = '';
+        errorDiv.textContent = '';
+      });
+    });
+  </script>
+
+</body>
+</html>
